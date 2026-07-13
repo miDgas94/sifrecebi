@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Şifre Cebi</title>
+<meta name="theme-color" content="#1e3a8a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Şifre Cebi">
+<style>
+:root {
+  --bg: #f3f4f6; --card: #ffffff; --text: #111827; --muted: #6b7280;
+  --accent: #1e3a8a; --accent-text: #ffffff; --border: #e5e7eb;
+  --danger: #b91c1c; --ok: #047857; --chip: #e0e7ff; --chip-text: #3730a3;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8;
+    --accent: #3b82f6; --accent-text: #ffffff; --border: #334155;
+    --danger: #f87171; --ok: #34d399; --chip: #1e3a5f; --chip-text: #93c5fd;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+  -webkit-tap-highlight-color: transparent;
+}
+header {
+  background: var(--accent); color: var(--accent-text);
+  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+header h1 { font-size: 1.15rem; font-weight: 700; }
+header .hbtns { display: flex; gap: 8px; }
+header button {
+  background: rgba(255,255,255,.15); color: var(--accent-text); border: none;
+  border-radius: 8px; padding: 8px 12px; font-size: .9rem; cursor: pointer;
+}
+main { max-width: 640px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+.center { text-align: center; }
+.logo { font-size: 3rem; margin: 18px 0 6px; }
+h2 { font-size: 1.25rem; margin-bottom: 10px; }
+p.hint { color: var(--muted); font-size: .88rem; line-height: 1.45; margin: 8px 0; }
+p.warn { color: var(--danger); font-size: .88rem; line-height: 1.45; margin: 8px 0; }
+p.good { color: var(--ok); font-size: .9rem; margin: 8px 0; }
+label { display: block; font-size: .85rem; color: var(--muted); margin: 12px 0 4px; }
+input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], textarea, select {
+  width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--bg); color: var(--text); outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 64px; }
+button.primary {
+  width: 100%; background: var(--accent); color: var(--accent-text); border: none;
+  border-radius: 10px; padding: 14px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 16px;
+}
+button.secondary {
+  width: 100%; background: none; border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: 12px; font-size: .95rem; cursor: pointer; margin-top: 10px;
+}
+button.linklike { background: none; border: none; color: var(--accent); font-size: .9rem; cursor: pointer; margin-top: 14px; }
+button.danger { background: none; border: 1px solid var(--danger); color: var(--danger); border-radius: 10px; padding: 12px; width: 100%; font-size: .95rem; cursor: pointer; margin-top: 10px; }
+.error { color: var(--danger); font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+.pwrow { display: flex; gap: 8px; }
+.pwrow input { flex: 1; }
+.pwrow button {
+  border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+  border-radius: 10px; padding: 0 14px; font-size: 1rem; cursor: pointer;
+}
+/* main list */
+.searchbar { display: flex; gap: 8px; margin-bottom: 12px; }
+.searchbar input { flex: 1; }
+.entry {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px; margin-bottom: 8px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.entry .info { min-width: 0; }
+.entry .title { font-weight: 600; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entry .sub { color: var(--muted); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+.chip { background: var(--chip); color: var(--chip-text); font-size: .72rem; padding: 4px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+.empty { text-align: center; color: var(--muted); padding: 40px 10px; font-size: .95rem; }
+.fab {
+  position: fixed; right: 20px; bottom: calc(24px + env(safe-area-inset-bottom));
+  width: 58px; height: 58px; border-radius: 50%; border: none;
+  background: var(--accent); color: var(--accent-text); font-size: 1.9rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3); cursor: pointer; z-index: 5; line-height: 1;
+}
+/* dialogs */
+dialog {
+  border: none; border-radius: 16px; background: var(--card); color: var(--text);
+  width: min(92vw, 480px); max-height: 86vh; overflow-y: auto; padding: 20px;
+  margin: auto;
+}
+dialog::backdrop { background: rgba(0,0,0,.55); }
+.dlg-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+.code-box {
+  font-family: ui-monospace, Consolas, monospace; font-size: 1.02rem; text-align: center;
+  background: var(--bg); border: 1px dashed var(--accent); border-radius: 10px;
+  padding: 14px 8px; margin: 12px 0; letter-spacing: 1px; word-break: break-all; user-select: all;
+}
+.check-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; font-size: .9rem; }
+.check-row input { width: auto; margin-top: 2px; }
+.detail-field { margin-bottom: 12px; }
+.detail-field .dlabel { font-size: .78rem; color: var(--muted); margin-bottom: 2px; }
+.detail-field .dval { font-size: .98rem; word-break: break-all; }
+.detail-field .dval.mono { font-family: ui-monospace, Consolas, monospace; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.detail-actions button {
+  flex: 1; min-width: 120px; border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); border-radius: 10px; padding: 10px; font-size: .88rem; cursor: pointer;
+}
+.gen-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: .92rem; }
+.gen-row input[type=checkbox] { width: auto; }
+.gen-row input[type=number] { width: 80px; }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px;
+  font-size: .88rem; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 100;
+  max-width: 88vw; text-align: center;
+}
+.toast.show { opacity: 1; }
+.menu-sheet button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); padding: 14px 6px; font-size: 1rem; cursor: pointer; border-bottom: 1px solid var(--border); }
+.menu-sheet button:last-child { border-bottom: none; }
+.menu-sheet button.mdanger { color: var(--danger); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔐 Şifre Cebi</h1>
+  <div class="hbtns hidden" id="header-btns">
+    <button id="btn-menu" aria-label="Menü">⋮</button>
+    <button id="btn-lock">Kilitle</button>
+  </div>
+</header>
+
+<main>
+  <!-- ====== KİLİT EKRANI ====== -->
+  <section id="view-locked" class="hidden">
+    <div class="card center">
+      <div class="logo">🔐</div>
+      <h2 id="locked-title">Kasayı Aç</h2>
+
+      <!-- mevcut kasa: kilit açma -->
+      <div id="unlock-form" class="hidden">
+        <p class="hint">Kasayı açmak için ana şifreni gir.</p>
+        <div class="pwrow" style="margin-top:10px">
+          <input type="password" id="unlock-pw" placeholder="Ana şifre" autocomplete="current-password">
+          <button type="button" data-toggle="unlock-pw">👁</button>
+        </div>
+        <div class="error" id="unlock-error"></div>
+        <button class="primary" id="btn-unlock">Kilidi Aç</button>
+        <button class="linklike" id="btn-forgot">Ana şifreni mi unuttun?</button>
+      </div>
+
+      <!-- yeni kasa oluşturma -->
+      <div id="create-form" class="hidden">
+        <p class="warn">İlk kullanım: bir ana şifre oluştur.<br>Bu şifreyi unutursan, kurtarma kodun olmadan verilerine ulaşılamaz!</p>
+        <div class="pwrow" style="margin-top:10px">
+          <input type="password" id="create-pw" placeholder="Ana şifre (en az 10 karakter)" autocomplete="new-password">
+          <button type="button" data-toggle="create-pw">👁</button>
+        </div>
+        <div class="pwrow" style="margin-top:8px">
+          <input type="password" id="create-pw2" placeholder="Ana şifre (tekrar)" autocomplete="new-password">
+          <button type="button" data-toggle="create-pw2">👁</button>
+        </div>
+        <div class="error" id="create-error"></div>
+        <button class="primary" id="btn-create">Kasayı Oluştur</button>
+        <button class="secondary" id="btn-import-first">Bilgisayardan kasa dosyası aktar (vault.dat)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== ANA EKRAN ====== -->
+  <section id="view-main" class="hidden">
+    <div class="searchbar">
+      <input type="text" id="search" placeholder="Ara: başlık, kategori, kullanıcı adı...">
+    </div>
+    <div id="entry-list"></div>
+    <button class="fab" id="btn-add" aria-label="Yeni kayıt">+</button>
+  </section>
+</main>
+
+<!-- ====== DİYALOGLAR ====== -->
+
+<dialog id="dlg-entry">
+  <div class="dlg-title" id="entry-dlg-title">Yeni Kayıt</div>
+  <label>Başlık</label>
+  <input type="text" id="f-title">
+  <label>Kategori</label>
+  <select id="f-category"></select>
+  <label>Kullanıcı Adı</label>
+  <input type="text" id="f-username" autocomplete="off">
+  <label>Şifre</label>
+  <div class="pwrow">
+    <input type="password" id="f-password" autocomplete="off">
+    <button type="button" data-toggle="f-password">👁</button>
+  </div>
+  <button class="secondary" id="btn-open-gen">🎲 Şifre Üret...</button>
+  <label>URL</label>
+  <input type="url" id="f-url" autocomplete="off">
+  <label>Not</label>
+  <textarea id="f-notes"></textarea>
+  <div class="error" id="entry-error"></div>
+  <button class="primary" id="btn-entry-save">Kaydet</button>
+  <button class="secondary" data-close="dlg-entry">Vazgeç</button>
+</dialog>
+
+<dialog id="dlg-detail">
+  <div class="dlg-title" id="detail-title"></div>
+  <div id="detail-body"></div>
+  <button class="secondary" id="btn-detail-edit">✏️ Düzenle</button>
+  <button class="danger" id="btn-detail-delete">🗑 Sil</button>
+  <button class="secondary" data-close="dlg-detail">Kapat</button>
+</dialog>
+
+<dialog id="dlg-gen">
+  <div class="dlg-title">Şifre Üret</div>
+  <div class="gen-row"><span>Uzunluk:</span><input type="number" id="g-len" value="20" min="8" max="64"></div>
+  <div class="gen-row"><input type="checkbox" id="g-upper" checked><span>Büyük harf (A-Z)</span></div>
+  <div class="gen-row"><input type="checkbox" id="g-lower" checked><span>Küçük harf (a-z)</span></div>
+  <div class="gen-row"><input type="checkbox" id="g-digits" checked><span>Rakam (0-9)</span></div>
+  <div class="gen-row"><input type="checkbox" id="g-symbols" checked><span>Sembol (!@#...)</span></div>
+  <div class="code-box" id="g-preview"></div>
+  <button class="secondary" id="btn-regen">🔄 Yeniden Üret</button>
+  <button class="primary" id="btn-use-gen">Kullan</button>
+  <button class="secondary" data-close="dlg-gen">Vazgeç</button>
+</dialog>
+
+<dialog id="dlg-recovery-show">
+  <div class="dlg-title">Kurtarma Kodun</div>
+  <p class="warn">Ana şifreni unutursan bu kodla yeni şifre belirleyebilirsin.<br><b>Bu kod bir daha gösterilmeyecek!</b></p>
+  <div class="code-box" id="rc-code"></div>
+  <button class="secondary" id="btn-rc-copy">📋 Kopyala</button>
+  <p class="warn">Bu kod başka hiçbir yerde saklanmıyor — şimdi güvenli bir yere (not defteri, mail taslağı vb.) kaydetmezsen kaybolur.</p>
+  <div class="check-row">
+    <input type="checkbox" id="rc-confirm">
+    <span>Bu kodu güvenli bir yere kaydettim</span>
+  </div>
+  <button class="primary" id="btn-rc-done" disabled>Kaydettim, Devam Et</button>
+</dialog>
+
+<dialog id="dlg-forgot">
+  <div id="forgot-step1">
+    <div class="dlg-title">Ana Şifreyi Kurtar</div>
+    <p class="hint">Kasa oluştururken sana gösterilen (veya mailine gönderilen) kurtarma kodunu gir:</p>
+    <input type="text" id="forgot-code" placeholder="XXXX-XXXX-XXXX-..." autocapitalize="characters" autocomplete="off" style="font-family:monospace;text-align:center">
+    <div class="error" id="forgot-error"></div>
+    <button class="primary" id="btn-forgot-check">Devam Et</button>
+    <button class="secondary" data-close="dlg-forgot">Vazgeç</button>
+  </div>
+  <div id="forgot-step2" class="hidden">
+    <div class="dlg-title">Yeni Ana Şifre</div>
+    <p class="good">Kod doğru! Şimdi yeni bir ana şifre belirle.</p>
+    <div class="pwrow" style="margin-top:8px">
+      <input type="password" id="forgot-pw" placeholder="Yeni ana şifre" autocomplete="new-password">
+      <button type="button" data-toggle="forgot-pw">👁</button>
+    </div>
+    <div class="pwrow" style="margin-top:8px">
+      <input type="password" id="forgot-pw2" placeholder="Tekrar" autocomplete="new-password">
+      <button type="button" data-toggle="forgot-pw2">👁</button>
+    </div>
+    <div class="error" id="forgot-error2"></div>
+    <button class="primary" id="btn-forgot-apply">Şifreyi Belirle ve Kasayı Aç</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-changepw">
+  <div class="dlg-title">Ana Şifreyi Değiştir</div>
+  <div class="pwrow" style="margin-top:8px">
+    <input type="password" id="chg-pw" placeholder="Yeni ana şifre" autocomplete="new-password">
+    <button type="button" data-toggle="chg-pw">👁</button>
+  </div>
+  <div class="pwrow" style="margin-top:8px">
+    <input type="password" id="chg-pw2" placeholder="Tekrar" autocomplete="new-password">
+    <button type="button" data-toggle="chg-pw2">👁</button>
+  </div>
+  <div class="error" id="chg-error"></div>
+  <button class="primary" id="btn-chg-apply">Değiştir</button>
+  <button class="secondary" data-close="dlg-changepw">Vazgeç</button>
+</dialog>
+
+<dialog id="dlg-renewrc">
+  <div class="dlg-title">Kurtarma Kodunu Yenile</div>
+  <p class="hint">Yeni bir kurtarma kodu üretilip eskisinin yerine geçer. Eski kod artık çalışmaz.</p>
+  <div class="error" id="renewrc-error"></div>
+  <button class="primary" id="btn-renewrc-apply">Kodu Yenile</button>
+  <button class="secondary" data-close="dlg-renewrc">Vazgeç</button>
+</dialog>
+
+<dialog id="dlg-menu">
+  <div class="menu-sheet">
+    <button id="m-changepw">🔑 Ana Şifreyi Değiştir</button>
+    <button id="m-renewrc">🎟 Kurtarma Kodunu Yenile</button>
+    <button id="m-export">📤 Kasayı Dışa Aktar (vault.dat)</button>
+    <button id="m-import">📥 Kasa Dosyası İçe Aktar</button>
+    <button data-close="dlg-menu">✖ Kapat</button>
+  </div>
+</dialog>
+
+<input type="file" id="file-import" accept=".dat,.json,application/json" class="hidden">
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ================= sabitler (masaüstü vault.py ile birebir aynı) ================= */
+const PBKDF2_ITERATIONS = 390000;
+const SALT_LEN = 16, NONCE_LEN = 12, DEK_LEN = 32;
+const RECOVERY_CODE_BYTES = 15;
+const CATEGORIES = ["E-posta", "E-Devlet", "Telefon/Operator", "Bankacilik", "Sosyal Medya", "Diger"];
+const MIN_MASTER_PASSWORD_LEN = 10;
+const CLIPBOARD_CLEAR_MS = 20000;
+const AUTO_LOCK_MS = 5 * 60 * 1000;
+const STORAGE_KEY = "sifrecebi.vault";
+
+const te = new TextEncoder(), td = new TextDecoder();
+
+/* ================= yardımcılar ================= */
+const b64e = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const b64d = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const rand = (n) => crypto.getRandomValues(new Uint8Array(n));
+
+const B32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+function b32encode(bytes) {
+  let bits = 0, value = 0, out = "";
+  for (const b of bytes) {
+    value = (value << 8) | b; bits += 8;
+    while (bits >= 5) { out += B32_ALPHABET[(value >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits > 0) out += B32_ALPHABET[(value << (5 - bits)) & 31];
+  return out;
+}
+
+function generateRecoveryCode() {
+  const encoded = b32encode(rand(RECOVERY_CODE_BYTES)); // 15 bayt -> 24 karakter
+  const groups = [];
+  for (let i = 0; i < encoded.length; i += 4) groups.push(encoded.slice(i, i + 4));
+  return groups.join("-");
+}
+// masaüstü _normalize_code ile aynı: trim + upper + sadece boşluk sil (tire kalır)
+const normalizeCode = (c) => c.trim().toUpperCase().replace(/ /g, "");
+
+/* ================= kripto (WebCrypto, Python cryptography ile uyumlu) ================= */
+async function deriveKey(secret, salt) {
+  const km = await crypto.subtle.importKey("raw", te.encode(secret), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" }, km, 256);
+  return crypto.subtle.importKey("raw", bits, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+async function importDek(dekBytes) {
+  return crypto.subtle.importKey("raw", dekBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+async function aesEncrypt(key, nonce, data) {
+  return new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, key, data));
+}
+async function aesDecrypt(key, nonce, data) {
+  return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: nonce }, key, data));
+}
+
+/* ================= vault katmanı ================= */
+const state = { raw: null, dek: null, entries: [], editingEntry: null, lastActivity: Date.now() };
+
+function vaultExists() { return localStorage.getItem(STORAGE_KEY) !== null; }
+function loadRawFromStorage() { return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
+function persistRaw() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.raw)); }
+
+async function vaultCreate(masterPassword, recoveryCode) {
+  const dek = rand(DEK_LEN);
+  const pwSalt = rand(SALT_LEN), pwNonce = rand(NONCE_LEN);
+  const pwKey = await deriveKey(masterPassword, pwSalt);
+  const wrappedPw = await aesEncrypt(pwKey, pwNonce, dek);
+
+  const rcSalt = rand(SALT_LEN), rcNonce = rand(NONCE_LEN);
+  const rcKey = await deriveKey(normalizeCode(recoveryCode), rcSalt);
+  const wrappedRc = await aesEncrypt(rcKey, rcNonce, dek);
+
+  state.raw = {
+    pw_salt: b64e(pwSalt), pw_nonce: b64e(pwNonce), wrapped_dek_password: b64e(wrappedPw),
+    rc_salt: b64e(rcSalt), rc_nonce: b64e(rcNonce), wrapped_dek_recovery: b64e(wrappedRc),
+  };
+  state.dek = dek;
+  state.entries = [];
+  await vaultSave();
+}
+
+async function vaultUnlock(masterPassword) {
+  const raw = loadRawFromStorage();
+  const pwKey = await deriveKey(masterPassword, b64d(raw.pw_salt));
+  let dek;
+  try {
+    dek = await aesDecrypt(pwKey, b64d(raw.pw_nonce), b64d(raw.wrapped_dek_password));
+  } catch (e) {
+    throw new Error("WRONG_PASSWORD");
+  }
+  state.raw = raw; state.dek = dek;
+  await loadEntries();
+}
+
+async function vaultRecoverWithCode(code) {
+  const raw = loadRawFromStorage();
+  const rcKey = await deriveKey(normalizeCode(code), b64d(raw.rc_salt));
+  let dek;
+  try {
+    dek = await aesDecrypt(rcKey, b64d(raw.rc_nonce), b64d(raw.wrapped_dek_recovery));
+  } catch (e) {
+    throw new Error("WRONG_CODE");
+  }
+  state.raw = raw; state.dek = dek;
+  await loadEntries();
+}
+
+async function loadEntries() {
+  const key = await importDek(state.dek);
+  const plain = await aesDecrypt(key, b64d(state.raw.data_nonce), b64d(state.raw.ciphertext));
+  state.entries = JSON.parse(td.decode(plain));
+}
+
+async function vaultSave() {
+  const key = await importDek(state.dek);
+  const nonce = rand(NONCE_LEN);
+  const ct = await aesEncrypt(key, nonce, te.encode(JSON.stringify(state.entries)));
+  state.raw.data_nonce = b64e(nonce);
+  state.raw.ciphertext = b64e(ct);
+  persistRaw();
+}
+
+async function rewrapPassword(newPassword) {
+  const salt = rand(SALT_LEN), nonce = rand(NONCE_LEN);
+  const key = await deriveKey(newPassword, salt);
+  const wrapped = await aesEncrypt(key, nonce, state.dek);
+  state.raw.pw_salt = b64e(salt); state.raw.pw_nonce = b64e(nonce);
+  state.raw.wrapped_dek_password = b64e(wrapped);
+  await vaultSave();
+}
+
+async function rewrapRecovery(newCode) {
+  const salt = rand(SALT_LEN), nonce = rand(NONCE_LEN);
+  const key = await deriveKey(normalizeCode(newCode), salt);
+  const wrapped = await aesEncrypt(key, nonce, state.dek);
+  state.raw.rc_salt = b64e(salt); state.raw.rc_nonce = b64e(nonce);
+  state.raw.wrapped_dek_recovery = b64e(wrapped);
+  await vaultSave();
+}
+
+/* ================= şifre üretici ================= */
+function generatePassword(length, upper, lower, digits, symbols) {
+  const pools = [];
+  if (upper) pools.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  if (lower) pools.push("abcdefghijklmnopqrstuvwxyz");
+  if (digits) pools.push("0123456789");
+  if (symbols) pools.push("!@#$%^&*()-_=+[]{};:,.?");
+  if (!pools.length) pools.push("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+  const alphabet = pools.join("");
+  const pick = (s) => s[crypto.getRandomValues(new Uint32Array(1))[0] % s.length];
+  const result = pools.map(pick);
+  while (result.length < length) result.push(pick(alphabet));
+  // Fisher-Yates
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result.slice(0, length).join("");
+}
+
+/* ================= UI yardımcıları ================= */
+const $ = (id) => document.getElementById(id);
+let toastTimer = null;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+let clipToken = null;
+async function copyToClipboard(text, isSecret) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    toast("Panoya kopyalanamadı."); return;
+  }
+  if (isSecret) {
+    clipToken = text;
+    toast(`Şifre kopyalandı. ${CLIPBOARD_CLEAR_MS / 1000} sn sonra pano temizlenecek.`);
+    setTimeout(async () => {
+      // sadece hala bizim kopyaladığımız değer duruyorsa temizlemeye çalış
+      try {
+        if (document.hasFocus() && clipToken === text) {
+          await navigator.clipboard.writeText("");
+          clipToken = null;
+        }
+      } catch (e) { /* izin yoksa sessiz geç */ }
+    }, CLIPBOARD_CLEAR_MS);
+  } else {
+    toast("Kopyalandı.");
+  }
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ================= görünüm yönetimi ================= */
+function showLocked() {
+  state.dek = null; state.entries = []; state.editingEntry = null;
+  document.querySelectorAll("dialog[open]").forEach(d => d.close());
+  $("view-main").classList.add("hidden");
+  $("header-btns").classList.add("hidden");
+  $("view-locked").classList.remove("hidden");
+  const has = vaultExists();
+  $("unlock-form").classList.toggle("hidden", !has);
+  $("create-form").classList.toggle("hidden", has);
+  $("locked-title").textContent = has ? "Kasayı Aç" : "Hoş Geldin!";
+  $("unlock-pw").value = ""; $("create-pw").value = ""; $("create-pw2").value = "";
+  $("unlock-error").textContent = ""; $("create-error").textContent = "";
+}
+
+function showMain() {
+  state.lastActivity = Date.now();
+  $("view-locked").classList.add("hidden");
+  $("view-main").classList.remove("hidden");
+  $("header-btns").classList.remove("hidden");
+  $("search").value = "";
+  refreshList();
+}
+
+function filteredEntries() {
+  const q = $("search").value.trim().toLowerCase();
+  const sorted = [...state.entries].sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase(), "tr"));
+  if (!q) return sorted;
+  return sorted.filter(e =>
+    e.title.toLowerCase().includes(q) ||
+    e.category.toLowerCase().includes(q) ||
+    (e.username || "").toLowerCase().includes(q));
+}
+
+function refreshList() {
+  const list = $("entry-list");
+  const entries = filteredEntries();
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty">${state.entries.length ? "Aramayla eşleşen kayıt yok." : "Henüz kayıt yok.<br>Sağ alttaki + ile ilk kaydını ekle."}</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(e => `
+    <div class="entry" data-id="${e.id}">
+      <div class="info">
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="sub">${escapeHtml(e.username || "—")}</div>
+      </div>
+      <span class="chip">${escapeHtml(e.category)}</span>
+    </div>`).join("");
+  list.querySelectorAll(".entry").forEach(el =>
+    el.addEventListener("click", () => openDetail(el.dataset.id)));
+}
+
+/* ================= kayıt detay / düzenleme ================= */
+function findEntry(id) { return state.entries.find(e => e.id === id); }
+
+function openDetail(id) {
+  const e = findEntry(id);
+  if (!e) return;
+  $("detail-title").textContent = e.title;
+  const rows = [];
+  rows.push(`<div class="detail-field"><div class="dlabel">Kategori</div><div class="dval">${escapeHtml(e.category)}</div></div>`);
+  if (e.username) rows.push(`<div class="detail-field"><div class="dlabel">Kullanıcı Adı</div><div class="dval">${escapeHtml(e.username)}</div></div>`);
+  rows.push(`<div class="detail-field"><div class="dlabel">Şifre</div><div class="dval mono" id="detail-pw">••••••••</div></div>`);
+  if (e.url) rows.push(`<div class="detail-field"><div class="dlabel">URL</div><div class="dval">${escapeHtml(e.url)}</div></div>`);
+  if (e.notes) rows.push(`<div class="detail-field"><div class="dlabel">Not</div><div class="dval">${escapeHtml(e.notes)}</div></div>`);
+  rows.push(`<div class="detail-actions">
+      <button id="d-copy-user">👤 K.Adı Kopyala</button>
+      <button id="d-copy-pw">🔑 Şifre Kopyala</button>
+      <button id="d-show-pw">👁 Şifreyi Göster</button>
+    </div>`);
+  $("detail-body").innerHTML = rows.join("");
+  $("d-copy-user").onclick = () => copyToClipboard(e.username || "", false);
+  $("d-copy-pw").onclick = () => copyToClipboard(e.password || "", true);
+  let shown = false;
+  $("d-show-pw").onclick = () => {
+    shown = !shown;
+    $("detail-pw").textContent = shown ? (e.password || "—") : "••••••••";
+    $("d-show-pw").textContent = shown ? "🙈 Gizle" : "👁 Şifreyi Göster";
+  };
+  $("btn-detail-edit").onclick = () => { $("dlg-detail").close(); openEntryDialog(e); };
+  $("btn-detail-delete").onclick = async () => {
+    if (!confirm(`'${e.title}' kaydı silinsin mi?`)) return;
+    state.entries = state.entries.filter(x => x.id !== e.id);
+    await vaultSave();
+    $("dlg-detail").close();
+    refreshList();
+    toast("Kayıt silindi.");
+  };
+  $("dlg-detail").showModal();
+}
+
+function openEntryDialog(entry) {
+  state.editingEntry = entry || null;
+  $("entry-dlg-title").textContent = entry ? "Kaydı Düzenle" : "Yeni Kayıt";
+  $("f-title").value = entry ? entry.title : "";
+  $("f-category").value = entry ? entry.category : CATEGORIES[0];
+  $("f-username").value = entry ? (entry.username || "") : "";
+  $("f-password").value = entry ? (entry.password || "") : "";
+  $("f-url").value = entry ? (entry.url || "") : "";
+  $("f-notes").value = entry ? (entry.notes || "") : "";
+  $("entry-error").textContent = "";
+  $("dlg-entry").showModal();
+}
+
+async function saveEntryFromDialog() {
+  const title = $("f-title").value.trim();
+  if (!title) { $("entry-error").textContent = "Başlık alanı boş olamaz."; return; }
+  const data = {
+    category: $("f-category").value,
+    title,
+    username: $("f-username").value.trim(),
+    password: $("f-password").value,
+    url: $("f-url").value.trim(),
+    notes: $("f-notes").value.trim(),
+  };
+  const now = new Date().toISOString();
+  if (state.editingEntry) {
+    Object.assign(state.editingEntry, data, { updated_at: now });
+  } else {
+    state.entries.push({ id: crypto.randomUUID(), ...data, created_at: now, updated_at: now });
+  }
+  await vaultSave();
+  $("dlg-entry").close();
+  refreshList();
+  toast("Kaydedildi.");
+}
+
+/* ================= kurtarma kodu gösterimi ================= */
+function showRecoveryCode(code, onDone) {
+  $("rc-code").textContent = code;
+  $("rc-confirm").checked = false;
+  $("btn-rc-done").disabled = true;
+  $("btn-rc-copy").onclick = () => copyToClipboard(code, false);
+  $("rc-confirm").onchange = () => { $("btn-rc-done").disabled = !$("rc-confirm").checked; };
+  $("btn-rc-done").onclick = () => { $("dlg-recovery-show").close(); if (onDone) onDone(); };
+  $("dlg-recovery-show").showModal();
+}
+
+/* ================= içe / dışa aktarma ================= */
+function exportVault() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) { toast("Dışa aktarılacak kasa yok."); return; }
+  const blob = new Blob([raw], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "vault.dat";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("vault.dat indirildi. (Dosya şifreli, güvenle taşınabilir.)");
+}
+
+function importVaultFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const raw = JSON.parse(reader.result);
+      const required = ["pw_salt", "pw_nonce", "wrapped_dek_password", "rc_salt", "rc_nonce", "wrapped_dek_recovery", "data_nonce", "ciphertext"];
+      for (const k of required) if (typeof raw[k] !== "string") throw new Error(`eksik alan: ${k}`);
+      if (vaultExists() && !confirm("Bu cihazda zaten bir kasa var. İçe aktarılan kasa mevcut kasanın YERİNE geçecek. Devam edilsin mi?")) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(raw));
+      document.querySelectorAll("dialog[open]").forEach(d => d.close());
+      showLocked();
+      toast("Kasa içe aktarıldı. Ana şifrenle açabilirsin.");
+    } catch (e) {
+      toast("Geçersiz kasa dosyası: " + e.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= olaylar ================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // kategori seçenekleri
+  $("f-category").innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join("");
+
+  // şifre göster/gizle butonları
+  document.querySelectorAll("[data-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const input = $(btn.dataset.toggle);
+      input.type = input.type === "password" ? "text" : "password";
+    });
+  });
+  // kapat butonları
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", () => $(btn.dataset.close).close());
+  });
+
+  /* --- kilit açma --- */
+  $("btn-unlock").addEventListener("click", doUnlock);
+  $("unlock-pw").addEventListener("keydown", (e) => { if (e.key === "Enter") doUnlock(); });
+  async function doUnlock() {
+    const pw = $("unlock-pw").value;
+    if (!pw) { $("unlock-error").textContent = "Şifre boş olamaz."; return; }
+    $("btn-unlock").disabled = true;
+    $("unlock-error").textContent = "";
+    try {
+      await vaultUnlock(pw);
+      showMain();
+    } catch (e) {
+      $("unlock-error").textContent = e.message === "WRONG_PASSWORD" ? "Ana şifre yanlış." : ("Kasa açılamadı: " + e.message);
+    } finally {
+      $("btn-unlock").disabled = false;
+    }
+  }
+
+  /* --- kasa oluşturma --- */
+  $("btn-create").addEventListener("click", async () => {
+    const pw = $("create-pw").value, pw2 = $("create-pw2").value;
+    if (pw.length < MIN_MASTER_PASSWORD_LEN) { $("create-error").textContent = `Ana şifre en az ${MIN_MASTER_PASSWORD_LEN} karakter olmalı.`; return; }
+    if (pw !== pw2) { $("create-error").textContent = "Şifreler eşleşmiyor."; return; }
+    $("btn-create").disabled = true;
+    try {
+      const code = generateRecoveryCode();
+      await vaultCreate(pw, code);
+      showRecoveryCode(code, showMain);
+    } finally {
+      $("btn-create").disabled = false;
+    }
+  });
+  $("btn-import-first").addEventListener("click", () => $("file-import").click());
+
+  /* --- şifremi unuttum --- */
+  $("btn-forgot").addEventListener("click", () => {
+    $("forgot-step1").classList.remove("hidden");
+    $("forgot-step2").classList.add("hidden");
+    $("forgot-code").value = ""; $("forgot-error").textContent = "";
+    $("forgot-pw").value = ""; $("forgot-pw2").value = ""; $("forgot-error2").textContent = "";
+    $("dlg-forgot").showModal();
+  });
+  $("btn-forgot-check").addEventListener("click", async () => {
+    $("btn-forgot-check").disabled = true;
+    $("forgot-error").textContent = "";
+    try {
+      await vaultRecoverWithCode($("forgot-code").value);
+      $("forgot-step1").classList.add("hidden");
+      $("forgot-step2").classList.remove("hidden");
+    } catch (e) {
+      $("forgot-error").textContent = e.message === "WRONG_CODE" ? "Kurtarma kodu yanlış." : ("Kod doğrulanamadı: " + e.message);
+    } finally {
+      $("btn-forgot-check").disabled = false;
+    }
+  });
+  $("btn-forgot-apply").addEventListener("click", async () => {
+    const pw = $("forgot-pw").value;
+    if (pw.length < MIN_MASTER_PASSWORD_LEN) { $("forgot-error2").textContent = `En az ${MIN_MASTER_PASSWORD_LEN} karakter olmalı.`; return; }
+    if (pw !== $("forgot-pw2").value) { $("forgot-error2").textContent = "Şifreler eşleşmiyor."; return; }
+    await rewrapPassword(pw);
+    $("dlg-forgot").close();
+    toast("Ana şifren güncellendi ve kasa açıldı.");
+    showMain();
+  });
+
+  /* --- ana ekran --- */
+  $("search").addEventListener("input", refreshList);
+  $("btn-add").addEventListener("click", () => openEntryDialog(null));
+  $("btn-entry-save").addEventListener("click", saveEntryFromDialog);
+  $("btn-lock").addEventListener("click", showLocked);
+  $("btn-menu").addEventListener("click", () => $("dlg-menu").showModal());
+
+  /* --- şifre üretici --- */
+  const regen = () => {
+    $("g-preview").textContent = generatePassword(
+      Math.min(64, Math.max(8, parseInt($("g-len").value) || 20)),
+      $("g-upper").checked, $("g-lower").checked, $("g-digits").checked, $("g-symbols").checked);
+  };
+  $("btn-open-gen").addEventListener("click", () => { regen(); $("dlg-gen").showModal(); });
+  $("btn-regen").addEventListener("click", regen);
+  ["g-len", "g-upper", "g-lower", "g-digits", "g-symbols"].forEach(id => $(id).addEventListener("change", regen));
+  $("btn-use-gen").addEventListener("click", () => {
+    $("f-password").value = $("g-preview").textContent;
+    $("dlg-gen").close();
+  });
+
+  /* --- menü --- */
+  $("m-changepw").addEventListener("click", () => {
+    $("dlg-menu").close();
+    $("chg-pw").value = ""; $("chg-pw2").value = ""; $("chg-error").textContent = "";
+    $("dlg-changepw").showModal();
+  });
+  $("btn-chg-apply").addEventListener("click", async () => {
+    const pw = $("chg-pw").value;
+    if (pw.length < MIN_MASTER_PASSWORD_LEN) { $("chg-error").textContent = `En az ${MIN_MASTER_PASSWORD_LEN} karakter olmalı.`; return; }
+    if (pw !== $("chg-pw2").value) { $("chg-error").textContent = "Şifreler eşleşmiyor."; return; }
+    await rewrapPassword(pw);
+    $("dlg-changepw").close();
+    toast("Ana şifre değiştirildi.");
+  });
+
+  $("m-renewrc").addEventListener("click", () => {
+    $("dlg-menu").close();
+    $("dlg-renewrc").showModal();
+  });
+  $("btn-renewrc-apply").addEventListener("click", async () => {
+    const code = generateRecoveryCode();
+    await rewrapRecovery(code);
+    $("dlg-renewrc").close();
+    showRecoveryCode(code, null);
+  });
+
+  $("m-export").addEventListener("click", () => { $("dlg-menu").close(); exportVault(); });
+  $("m-import").addEventListener("click", () => { $("dlg-menu").close(); $("file-import").click(); });
+  $("file-import").addEventListener("change", (e) => {
+    if (e.target.files.length) importVaultFile(e.target.files[0]);
+    e.target.value = "";
+  });
+
+  /* --- otomatik kilit --- */
+  const noteActivity = () => { state.lastActivity = Date.now(); };
+  ["click", "keydown", "touchstart", "input"].forEach(ev =>
+    document.addEventListener(ev, noteActivity, { passive: true }));
+  setInterval(() => {
+    if (state.dek && Date.now() - state.lastActivity >= AUTO_LOCK_MS) showLocked();
+  }, 30000);
+  document.addEventListener("visibilitychange", () => {
+    // arka plandan dönüşte süre dolmuşsa kilitle
+    if (document.visibilityState === "visible" && state.dek &&
+        Date.now() - state.lastActivity >= AUTO_LOCK_MS) showLocked();
+  });
+
+  showLocked();
+});
+
+/* ================= service worker ================= */
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
