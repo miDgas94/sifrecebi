@@ -244,6 +244,7 @@ dialog::backdrop { background: rgba(0,0,0,.55); }
   <div class="dlg-title">Kurtarma Kodun</div>
   <p class="warn">Ana şifreni unutursan bu kodla yeni şifre belirleyebilirsin.<br><b>Bu kod bir daha gösterilmeyecek!</b></p>
   <div class="code-box" id="rc-code"></div>
+  <button class="secondary" id="btn-rc-mail">📧 Kodu Mailime Gönder</button>
   <button class="secondary" id="btn-rc-copy">📋 Kopyala</button>
   <p class="warn">Bu kod başka hiçbir yerde saklanmıyor — şimdi güvenli bir yere (not defteri, mail taslağı vb.) kaydetmezsen kaybolur.</p>
   <div class="check-row">
@@ -648,6 +649,17 @@ function showRecoveryCode(code, onDone) {
   $("rc-confirm").checked = false;
   $("btn-rc-done").disabled = true;
   $("btn-rc-copy").onclick = () => copyToClipboard(code, false);
+  $("btn-rc-mail").onclick = () => {
+    const subject = encodeURIComponent("Şifre Cebi - Kurtarma Kodun");
+    const body = encodeURIComponent(
+      "Şifre Cebi - Kurtarma Kodu\n\n" +
+      "Ana şifreni unutursan bu kodu 'Ana şifreni mi unuttun?' ekranına girerek\n" +
+      "yeni bir ana şifre belirleyebilir ve kayıtlarına tekrar ulaşabilirsin.\n\n" +
+      "Kurtarma Kodu: " + code + "\n\n" +
+      "Bu kodu kimseyle paylaşma. Bu maili silme!"
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
   $("rc-confirm").onchange = () => { $("btn-rc-done").disabled = !$("rc-confirm").checked; };
   $("btn-rc-done").onclick = () => { $("dlg-recovery-show").close(); if (onDone) onDone(); };
   $("dlg-recovery-show").showModal();
